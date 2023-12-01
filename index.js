@@ -32,7 +32,7 @@ async function run() {
 
     const testCollection = client.db('docHouseDB').collection('tests')
     const userCollection = client.db('docHouseDB').collection('users')
-    const reviewCollection = client.db('docHouseDB').collection('reviews')
+    const serviceCollection = client.db('docHouseDB').collection('services')
     const appointCollection = client.db('docHouseDB').collection('appoint')
 
    
@@ -47,12 +47,58 @@ app.post('/allTests', async(req, res) => {
   const result = await testCollection.insertOne(cartItem);
   res.send(result)
 
+});
+
+app.put('/allTests/:id', async (req, res)=>{
+  const id = req.params.id;
+  const query = {_id : new ObjectId(id)};
+  const updatedTest = req.body;
+  const updateDoc = {
+    $set:{
+      name: updatedTest.name,
+      title_name: updatedTest.title_name,
+      posting_time: updatedTest.posting_time,
+      deadline: updatedTest.deadline,
+      price: updatedTest.price,
+      slot_number: updatedTest.slot_number,
+      img_url: updatedTest.img_url,
+      description: updatedTest.description,
+    }
+  }
+  const result = await testCollection.updateOne(query, updateDoc);
+  res.send(result)
+})
+
+app.delete('/allTests/:id', async(req, res)=> {
+  const id = req.params.id;
+  const query = { _id : new ObjectId(id) };
+  const result = await testCollection.deleteOne(query);
+  res.send(result);
 })
 
 app.get('/allTests/:id', async(req, res)=> {
   const id = req.params.id;
   const query = {_id : new ObjectId(id)};
  const result = await testCollection.findOne(query);
+  res.send(result);
+})
+// Services  related  api
+app.get('/service',  async (req, res) => {
+    const result = await serviceCollection.find().toArray();
+    res.send(result);
+})
+
+app.post('/service', async(req, res) => {
+  const cartItem = req.body;
+  const result = await serviceCollection.insertOne(cartItem);
+  res.send(result)
+
+})
+
+app.get('/service/:id', async(req, res)=> {
+  const id = req.params.id;
+  const query = {_id : new ObjectId(id)};
+ const result = await serviceCollection.findOne(query);
   res.send(result);
 })
 
@@ -99,8 +145,14 @@ app.delete('/appoint/:id', async(req, res)=> {
 
 
 // users related api
+
 app.get('/users', async (req, res) => {
-  const result = await userCollection.find().toArray();
+  const {email} = req.query
+  let query = {};
+  if(email){
+    query= {email: email}
+  }
+  const result = await userCollection.find(query).toArray();
   res.send(result);
 })
 
@@ -123,6 +175,21 @@ app.post('/users', async(req, res) => {
   res.send(result)
 
 })
+
+app.put('/users/:id', async (req, res)=>{
+  const id = req.params.id;
+  const query = {_id : new ObjectId(id)};
+  const updatedUser = req.body;
+  const updateDoc = {
+    $set:{
+      status: updatedUser.status
+    }
+  }
+  const result = await userCollection.updateOne(query, updateDoc);
+  res.send(result)
+}
+
+)
 
 app.patch('/users/admin/:id', async (req, res) => {
   const id = req.params.id;
