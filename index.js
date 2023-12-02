@@ -13,7 +13,10 @@ app.use(express.json())
 
 
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.anrbjpf.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://docHouseDB:2tSKr6pIdp2XtyWs@cluster0.anrbjpf.mongodb.net/?retryWrites=true&w=majority`;
+
+const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ac-n1ztrwr-shard-00-00.anrbjpf.mongodb.net:27017,ac-n1ztrwr-shard-00-01.anrbjpf.mongodb.net:27017,ac-n1ztrwr-shard-00-02.anrbjpf.mongodb.net:27017/?ssl=true&replicaSet=atlas-nslw29-shard-0&authSource=admin&retryWrites=true&w=majority`;
+console.log(process.env.DB_USER, process.env.DB_PASS);
 
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -28,7 +31,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const testCollection = client.db('docHouseDB').collection('tests')
     const userCollection = client.db('docHouseDB').collection('users')
@@ -107,20 +110,6 @@ app.get('/reviews',  async (req, res) => {
     res.send(result);
 })
 
-// carts related
-
-// app.get('/appoints',  async (req, res) => {
-//   const email = req.query;
-//   const result = await appointCollection.find().toArray();
-//   res.send(result);
-// })
-
-// app.get('/appoints/all',  async (req, res) => {
-//   const email = req.query.email;
-//   const query = {email: email}
-//   const result = await appointCollection.find(query).toArray();
-//   res.send(result);
-// })
 
 app.get('/appoints/:email', async (req, res) => {
   const email = req.params.email;
@@ -176,17 +165,36 @@ app.post('/users', async(req, res) => {
 
 })
 
-app.put('/users/:id', async (req, res)=>{
-  const id = req.params.id;
-  const query = {_id : new ObjectId(id)};
+app.patch('/users/:email', async (req, res)=>{
+  const email = req.params.email;
+  const query = { email : email};
   const updatedUser = req.body;
+  // const find = await userCollection.findOne(query)
+  // console.log(find, email);
   const updateDoc = {
     $set:{
-      status: updatedUser.status
+      name: updatedUser.name,
+      email: updatedUser.email,
+      photoURL: updatedUser.photoURL,
+      upazila: updatedUser.upazila,
+      districts: updatedUser.districts,
+      blood_group: updatedUser.blood_group,
+      password: updatedUser.password,
     }
   }
   const result = await userCollection.updateOne(query, updateDoc);
   res.send(result)
+  
+}
+
+)
+app.get('/singleUser/:email', async (req, res)=>{
+  const email = req.params.email;
+  const query = { email : email};
+  const find = await userCollection.findOne(query)
+  console.log(find, email);
+  res.send(find)
+  
 }
 
 )
@@ -232,5 +240,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, ()=>{
-    console.log(`bistro boss server is runnig on port ${port}`);
+    console.log(`diagnostic server is runnig on port ${port}`);
 })
