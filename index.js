@@ -34,11 +34,25 @@ async function run() {
     // await client.connect();
 
     const testCollection = client.db('docHouseDB').collection('tests')
+    const bookCollection = client.db('docHouseDB').collection('bookTests')
     const userCollection = client.db('docHouseDB').collection('users')
     const serviceCollection = client.db('docHouseDB').collection('services')
     const appointCollection = client.db('docHouseDB').collection('appoint')
 
    
+  app.get('/bookTests',  async (req, res) => {
+      const result = await bookCollection.find().toArray();
+      res.send(result);
+  })
+  
+  app.post('/bookTests', async(req, res) => {
+    const cartItem = req.body;
+    const result = await bookCollection.insertOne(cartItem);
+    res.send(result)
+  });
+
+
+
 // Test  related  api
 app.get('/allTests',  async (req, res) => {
     const result = await testCollection.find().toArray();
@@ -165,6 +179,21 @@ app.post('/users', async(req, res) => {
 
 })
 
+// user block & active related api
+app.put('/users/:id', async (req, res)=>{
+  const id = req.params.id;
+  const filter = {_id : new ObjectId(id)}
+  const updateStatus = req.body
+  const updateDoc = {
+    $set:{
+      status: updateStatus.status
+    }
+  }
+  const result = await userCollection.updateOne(filter, updateDoc);
+  res.send(result)
+})
+
+
 app.patch('/users/:email', async (req, res)=>{
   const email = req.params.email;
   const query = { email : email};
@@ -210,18 +239,6 @@ app.patch('/users/admin/:id', async (req, res) => {
   const result = await userCollection.updateOne(filter, updateDoc);
   res.send(result)
 })
-
-// email veruified
-
-
-
-
-
-
-
-
-
-
 
 
     // Send a ping to confirm a successful connection
