@@ -55,9 +55,15 @@ async function run() {
 
 // Test  related  api
 app.get('/allTests',  async (req, res) => {
-    const result = await testCollection.find().toArray();
-    res.send(result);
+    const page = req.query.page
+    console.log(page);
+    const perPage = 3;
+    const totalPage = page*perPage;
+    const result = await testCollection.find().sort({posting_time:-1}).skip(totalPage).limit(perPage).toArray();
+    const dataLength = await testCollection.find().toArray();
+    res.send({result, dataLength});
 })
+
 
 app.post('/allTests', async(req, res) => {
   const cartItem = req.body;
