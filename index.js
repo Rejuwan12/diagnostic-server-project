@@ -38,8 +38,10 @@ async function run() {
     const userCollection = client.db('docHouseDB').collection('users')
     const serviceCollection = client.db('docHouseDB').collection('services')
     const appointCollection = client.db('docHouseDB').collection('appoint')
+    const bannerCollection = client.db('docHouseDB').collection('banners')
 
-   
+   // booking related
+
   app.get('/bookTests',  async (req, res) => {
       const result = await bookCollection.find().toArray();
       res.send(result);
@@ -50,6 +52,26 @@ async function run() {
     const result = await bookCollection.insertOne(cartItem);
     res.send(result)
   });
+  // banner related
+
+  app.get('/banners',  async (req, res) => {
+      const result = await bannerCollection.find().toArray();
+      res.send(result);
+  })
+  
+  app.post("/banners", async (req, res) => {
+    const banner = req.body;
+    const result = await bannerCollection.insertOne(banner);
+    res.send(result);
+  });
+  
+  app.delete("/banners/:id", async (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    const query = { _id: new ObjectId(id) };
+    const result = await bannerCollection.deleteOne(query);
+    res.send(result);
+  })
 
 
 
@@ -63,6 +85,13 @@ app.get('/allTests',  async (req, res) => {
     const dataLength = await testCollection.find().toArray();
     res.send({result, dataLength});
 })
+
+app.get('/showAllTest',  async (req, res) => {
+  const result = await testCollection.find().toArray();
+  res.send(result);
+})
+
+
 
 
 app.post('/allTests', async(req, res) => {
